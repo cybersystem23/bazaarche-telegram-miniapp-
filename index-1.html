@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#ffffff">
+<title>بازارچه | خرید و فروش</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--green:#149b62;--ink:#202124;--muted:#70757a;--line:#e8eaed;--bg:#f6f7f8}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Tahoma,Arial,sans-serif;font-size:14px}
+header{background:white;padding:16px 14px 12px;position:sticky;top:0;z-index:5;border-bottom:1px solid var(--line)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px}.brand{font-size:22px;font-weight:800;color:var(--green)}.sub{font-size:11px;color:var(--muted);margin-top:4px}
+button{font:inherit;border:0;cursor:pointer;border-radius:10px;padding:11px 13px}.primary{background:var(--green);color:#fff;font-weight:bold}.outline{background:white;border:1px solid var(--line);color:var(--ink)}
+.search{margin-top:14px;display:flex;gap:8px}.search input{min-width:0;flex:1;background:#f2f3f4;border:1px solid transparent;border-radius:10px;padding:12px;font:inherit;outline:none}
+main{max-width:850px;margin:auto;padding:14px}.section-title{font-weight:bold;font-size:15px;margin:6px 0 12px}
+.cats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:18px}.cat{background:white;border:1px solid var(--line);padding:12px 3px;text-align:center;border-radius:12px;font-size:12px}.cat .emoji{font-size:23px;display:block;margin-bottom:7px}
+.listings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.ad{background:#fff;border:1px solid var(--line);border-radius:13px;overflow:hidden;min-width:0}.photo{height:118px;background:#e9efec;display:flex;align-items:center;justify-content:center;font-size:42px}.ad-body{padding:10px}.ad h3{font-size:13px;line-height:1.8;margin:0 0 8px;font-weight:600}.price{font-weight:bold;color:#222;margin-bottom:8px}.meta{font-size:11px;color:var(--muted);display:flex;justify-content:space-between;gap:4px}
+.empty{padding:25px;text-align:center;color:var(--muted);grid-column:1/-1;background:white;border-radius:12px}
+.bottom{position:sticky;bottom:0;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--line);display:flex;gap:8px;z-index:4}.bottom button{flex:1}
+.modal{position:fixed;inset:0;background:#0008;z-index:10;display:none;align-items:flex-end;justify-content:center}.modal.show{display:flex}.sheet{width:100%;max-width:600px;max-height:92vh;overflow:auto;background:#fff;border-radius:18px 18px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom))}.sheet h2{margin:0 0 16px;font-size:18px}.field{margin:12px 0}.field label{display:block;margin-bottom:7px;font-size:12px;color:#555}.field input,.field select,.field textarea{width:100%;border:1px solid #ddd;border-radius:10px;padding:12px;font:inherit;background:white}.field textarea{min-height:75px;resize:vertical}.row{display:flex;gap:9px}.row>*{flex:1;min-width:0}.hint{font-size:11px;color:var(--muted);line-height:1.8;margin:10px 0}
+@media(min-width:650px){.listings{grid-template-columns:repeat(3,minmax(0,1fr))}.photo{height:150px}.bottom{max-width:850px;margin:auto;border:0;background:transparent}}
+</style>
+</head>
+<body>
+<header><div class="top"><div><div class="brand">بازارچه</div><div class="sub">خرید و فروش آسان، نزدیک شما</div></div><button class="outline" id="cityBtn">📍 انتخاب شهر</button></div><div class="search"><input id="search" placeholder="جست‌وجو در آگهی‌ها..." aria-label="جست‌وجو"><button class="primary" id="searchBtn">جست‌وجو</button></div></header>
+<main><div class="section-title">دسته‌بندی‌ها</div><div class="cats">
+<button class="cat" data-cat="همه"><span class="emoji">🧭</span>همه آگهی‌ها</button><button class="cat" data-cat="موبایل"><span class="emoji">📱</span>موبایل</button><button class="cat" data-cat="خانه"><span class="emoji">🛋️</span>خانه و آشپزخانه</button><button class="cat" data-cat="خودرو"><span class="emoji">🚗</span>خودرو</button><button class="cat" data-cat="املاک"><span class="emoji">🏠</span>املاک</button><button class="cat" data-cat="خدمات"><span class="emoji">🧰</span>خدمات</button><button class="cat" data-cat="وسایل"><span class="emoji">🪑</span>وسایل شخصی</button><button class="cat" data-cat="دیگر"><span class="emoji">📦</span>سایر</button></div>
+<div class="top" style="margin-bottom:12px"><div class="section-title" style="margin:0">تازه‌ترین آگهی‌ها</div><span id="count" class="sub"></span></div><div id="listings" class="listings"></div><p class="hint">نسخه آزمایشی: آگهی‌هایی که ثبت می‌کنید فعلاً فقط روی همین دستگاه ذخیره می‌شوند و برای دیگران قابل مشاهده نیستند. برای انتشار واقعی باید پایگاه داده مشترک متصل شود.</p></main>
+<div class="bottom"><button class="primary" id="addBtn">＋ ثبت آگهی رایگان</button><button class="outline" id="myBtn">آگهی‌های من</button></div>
+<div class="modal" id="modal"><div class="sheet"><div class="top"><h2>ثبت آگهی جدید</h2><button class="outline" id="closeBtn">بستن ✕</button></div><form id="adForm">
+<div class="field"><label for="title">عنوان آگهی *</label><input id="title" required maxlength="80" placeholder="مثلاً گوشی موبایل تمیز"></div>
+<div class="row"><div class="field"><label for="category">دسته‌بندی *</label><select id="category" required><option>موبایل</option><option>خانه</option><option>خودرو</option><option>املاک</option><option>خدمات</option><option>وسایل</option><option>دیگر</option></select></div><div class="field"><label for="price">قیمت (تومان) *</label><input id="price" required inputmode="numeric" placeholder="مثلاً 12000000"></div></div>
+<div class="field"><label for="city">شهر</label><input id="city" value="تهران" maxlength="40"></div>
+<div class="field"><label for="desc">توضیحات</label><textarea id="desc" maxlength="500" placeholder="جزئیات آگهی را بنویسید"></textarea></div>
+<div class="field"><label for="phone">شماره تماس (اختیاری)</label><input id="phone" inputmode="tel" maxlength="20" placeholder="شماره‌ای که می‌خواهید نمایش داده شود"></div>
+<p class="hint">از درج اطلاعات محرمانه خودداری کنید. در این نسخه، آگهی فقط در مرورگر همین دستگاه ذخیره می‌شود.</p>
+<button class="primary" type="submit" style="width:100%">ثبت آگهی</button></form></div></div>
+<script>
+(function(){
+const tg=window.Telegram&&window.Telegram.WebApp;
+if(tg){tg.ready();tg.expand();try{tg.setHeaderColor('#ffffff');tg.setBackgroundColor('#f6f7f8')}catch(e){}}
+const demo=[
+{id:'d1',title:'گوشی موبایل سالم و تمیز',category:'موبایل',price:8500000,city:'تهران',desc:'کاملاً سالم، آماده تست',emoji:'📱',date:Date.now()-1000},
+{id:'d2',title:'میز ناهارخوری ۴ نفره',category:'خانه',price:4200000,city:'تهران',desc:'تمیز و کم‌استفاده',emoji:'🪑',date:Date.now()-2000},
+{id:'d3',title:'خدمات تعمیرات در محل',category:'خدمات',price:0,city:'تهران',desc:'تماس برای هماهنگی',emoji:'🧰',date:Date.now()-3000},
+{id:'d4',title:'خودروی کم‌کارکرد',category:'خودرو',price:480000000,city:'کرج',desc:'بازدید با هماهنگی',emoji:'🚗',date:Date.now()-4000}
+];
+let ads=JSON.parse(localStorage.getItem('bazaarche_ads')||'null')||demo;
+let filter='همه',mine=false;
+const fmt=n=>n===0?'توافقی':Number(n).toLocaleString('fa-IR')+' تومان';
+function save(){localStorage.setItem('bazaarche_ads',JSON.stringify(ads))}
+function render(){
+const q=document.getElementById('search').value.trim().toLowerCase();
+const shown=ads.filter(a=>(filter==='همه'||a.category===filter)&&(!mine||!String(a.id).startsWith('d'))&&(!q||(a.title+' '+a.desc+' '+a.city+' '+a.category).toLowerCase().includes(q)));
+document.getElementById('count').textContent=shown.length+' آگهی';
+const el=document.getElementById('listings');el.innerHTML='';
+if(!shown.length){el.innerHTML='<div class="empty">آگهی‌ای پیدا نشد.</div>';return}
+shown.sort((a,b)=>b.date-a.date).forEach(a=>{const card=document.createElement('article');card.className='ad';const emoji=a.emoji||({موبایل:'📱',خانه:'🛋️',خودرو:'🚗',املاک:'🏠',خدمات:'🧰',وسایل:'🪑',دیگر:'📦'}[a.category]||'📦');card.innerHTML='<div class="photo">'+emoji+'</div><div class="ad-body"><h3></h3><div class="price"></div><div class="meta"><span></span><span></span></div></div>';card.querySelector('h3').textContent=a.title;card.querySelector('.price').textContent=fmt(Number(a.price));card.querySelector('.meta span:first-child').textContent=a.city||'بدون شهر';card.querySelector('.meta span:last-child').textContent=a.category;card.addEventListener('click',()=>{let msg=a.title+'\\nقیمت: '+fmt(Number(a.price))+'\\nشهر: '+(a.city||'—')+'\\n\\n'+(a.desc||'بدون توضیحات')+(a.phone?'\\nتماس: '+a.phone:'');if(tg&&tg.showPopup){tg.showPopup({title:'جزئیات آگهی',message:msg,buttons:[{type:'ok',text:'متوجه شدم'}]})}else alert(msg)});el.appendChild(card)})
+}
+document.querySelectorAll('[data-cat]').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.cat;mine=false;render()}));
+document.getElementById('searchBtn').onclick=()=>render();document.getElementById('search').addEventListener('keydown',e=>{if(e.key==='Enter')render()});
+const modal=document.getElementById('modal');document.getElementById('addBtn').onclick=()=>{modal.classList.add('show')};document.getElementById('closeBtn').onclick=()=>modal.classList.remove('show');modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('show')});
+document.getElementById('myBtn').onclick=()=>{mine=!mine;filter='همه';render();document.getElementById('myBtn').textContent=mine?'نمایش همه آگهی‌ها':'آگهی‌های من'};
+document.getElementById('cityBtn').onclick=()=>{const c=prompt('نام شهر را وارد کنید:','تهران');if(c!==null){document.getElementById('city').value=c.trim();document.getElementById('search').value=c.trim();render()}};
+document.getElementById('adForm').addEventListener('submit',e=>{e.preventDefault();const a={id:'u'+Date.now(),title:document.getElementById('title').value.trim(),category:document.getElementById('category').value,price:document.getElementById('price').value.replace(/[^0-9]/g,''),city:document.getElementById('city').value.trim(),desc:document.getElementById('desc').value.trim(),phone:document.getElementById('phone').value.trim(),date:Date.now()};if(!a.title||a.price===''){alert('عنوان و قیمت را وارد کنید');return}ads.push(a);save();mine=false;filter='همه';render();e.target.reset();document.getElementById('city').value='تهران';modal.classList.remove('show');if(tg&&tg.showAlert)tg.showAlert('آگهی روی همین دستگاه ذخیره شد. برای نمایش عمومی باید نسخه سروری فعال شود.');else alert('آگهی روی همین دستگاه ذخیره شد. برای نمایش عمومی باید نسخه سروری فعال شود.')});
+render();
+})();
+</script></body></html>
